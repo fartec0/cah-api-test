@@ -46,33 +46,59 @@ For the modern web, any latency reduction is [very valuable](https://www.gigaspa
 
 In order to establish a performance baseline, measurements should be performed using a `customer-realistic` load. During the sofware development cycle, performance tests can be executed and the initial baseline used for comparison. Also it is important that no socket errors are encountered during the baseline definition.
 
-### Customer realistic baseline
-For example, the following performance baseline (free of socket errors) was gathered using WRK tool, and its using the considered customer-realistic scenario for this project:
+### Customer realistic baselines
+
+#### Regular load
+The following performance baseline (free of socket errors) was gathered using WRK tool, and its using the considered customer-realistic scenario for this project for a regular customer usage load event:
 - Endpoint: https://caha-api-test.herokuapp.com/pick
-- **Test duration: 15.02s**
+- **Test duration: 15.10**
+- Number of open connections: 10
+- **Number of threads (users): 10**
+- Total number of requests: 1326 (read)
+- Latency distribution: 310,96ms for the 99% percentile
+- Latency distribution: 128,78ms for the 90% percentile
+- **Socket errors: 0**
+- 
+``` bash
+Running 15s test @ https://cah-api-test.herokuapp.com/pick
+  10 threads and 10 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   111.47ms   38.25ms 321.80ms   92.41%
+    Req/Sec     9.29      2.42    20.00     88.29%
+  Latency Distribution
+     50%  101.24ms
+     75%  105.11ms
+     90%  128.78ms
+     99%  310.96ms
+  1326 requests in 15.10s, 367.38KB read
+Requests/sec:     87.80
+Transfer/sec:     24.32KB
+```
+
+#### High load
+The following performance baseline (free of socket errors) was gathered using WRK tool, and its using the considered customer-realistic scenario for this project for a high load event:
+- Endpoint: https://caha-api-test.herokuapp.com/pick
+- **Test duration: 15.10**
 - Number of open connections: 100
 - **Number of threads (users): 10**
-- Total number of requests: 6539 (read)
-- Latency distribution: 119,45ms for the 99% percentile
-- Socket errors: 0
+- Total number of requests: 15750 (read)
+- Latency distribution: 494,32ms for the 99% percentile
+- Latency distribution: 302,15ms for the 90% percentile
+- **Socket errors: 0**
 
 ``` bash
-wrk --latency --timeout 3s --threads 10 --connections 100 --duration 15s https://caha-api-test.herokuapp.com/pick
-Running 15s test @ https://caha-api-test.herokuapp.com/pick
-  10 threads and 100 connections
+  10 threads and 200 connections
   Thread Stats   Avg      Stdev     Max   +/- Stdev
-    Latency    59.17ms   12.45ms 149.38ms   87.90%
-    Req/Sec    44.30     19.98   101.00     64.98%
+    Latency   188.38ms   79.74ms 594.82ms   77.08%
+    Req/Sec   108.59     54.86   230.00     61.67%
   Latency Distribution
-     50%   57.33ms
-     75%   63.01ms
-     90%   71.25ms
-     99%  119.45ms
-  6539 requests in 15.02s, 4.71MB read
-  Socket errors: connect 0, read 6539, write 0, timeout 0
-  Non-2xx or 3xx responses: 6539
-Requests/sec:    435.46
-Transfer/sec:    321.02KB
+     50%  168.28ms
+     75%  217.91ms
+     90%  302.15ms
+     99%  494.32ms
+  15750 requests in 15.10s, 4.28MB read
+Requests/sec:   1042.82
+Transfer/sec:    290.41KB
 ```
 
 ### Load spike Baseline 
@@ -122,7 +148,209 @@ Image below, an extract from the Heroku metrics dashboard, showing spikes in `re
 
 Note that the SUT could not handle an excessive amount of requests, demonstrating that the network load should be reduced gradually until no socket errors are triggered, and thus identifying the actual application limit.
 
+## Test results for the /pick endpoint with high load, increase of open connections
+The test scenarios used the following values, with the objective of gradually scaling the number of open connections, while keeping socket errors inexistent.
 
+#### 100 connections
+- Test duration: 15.10s
+- Total connections: 100
+- Total number of requests: 12181
+- Latency distribution: 389.30ms for the 99% percentile
+- Socket errors: 0
+``` bash
+Running 15s test @ https://cah-api-test.herokuapp.com/pick
+  10 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   122.57ms   51.39ms   1.10s    93.17%
+    Req/Sec    84.47     23.26   140.00     74.11%
+  Latency Distribution
+     50%  107.39ms
+     75%  123.15ms
+     90%  155.46ms
+     99%  389.30ms
+  12181 requests in 15.10s, 3.31MB read
+Requests/sec:    806.85
+Transfer/sec:    224.76KB
+```
 
-## Conclusion
-Considering the 
+#### 200 connections
+- Test duration: 15.10s
+- Total connections: 200
+- Total number of requests: 15750
+- Latency distribution: 494.32ms for the 99% percentile
+- Socket errors: 0
+
+Results
+``` bash
+  10 threads and 200 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   188.38ms   79.74ms 594.82ms   77.08%
+    Req/Sec   108.59     54.86   230.00     61.67%
+  Latency Distribution
+     50%  168.28ms
+     75%  217.91ms
+     90%  302.15ms
+     99%  494.32ms
+  15750 requests in 15.10s, 4.28MB read
+Requests/sec:   1042.82
+Transfer/sec:    290.41KB
+```
+
+#### 300 connections - Start of 'connect' socket errors
+- Test duration: 15.10s
+- Total connections: 300
+- Total number of requests: 20522
+- Latency distribution: 438.44ms for the 99% percentile
+- Socket errors: 61
+
+``` bash
+  10 threads and 300 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   171.75ms   78.50ms   2.35s    88.89%
+    Req/Sec   144.00     76.28   353.00     65.55%
+  Latency Distribution
+     50%  151.84ms
+     75%  190.96ms
+     90%  261.16ms
+     99%  438.44ms
+  20522 requests in 15.10s, 5.58MB read
+  Socket errors: connect 61, read 0, write 0, timeout 0
+Requests/sec:   1359.12
+Transfer/sec:    378.74KB
+```
+
+#### 400 connections - Increased socket errors
+- Test duration: 15.10s
+- Total connections: 300
+- Total number of requests: 17466
+- Latency distribution: 611.69ms for the 99% percentile
+- Socket errors: 161
+
+``` bash
+  10 threads and 400 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   200.73ms   94.04ms 976.23ms   84.43%
+    Req/Sec   145.90    107.56   410.00     64.42%
+  Latency Distribution
+     50%  177.79ms
+     75%  223.26ms
+     90%  306.71ms
+     99%  611.17ms
+  17466 requests in 15.10s, 4.75MB read
+  Socket errors: connect 161, read 0, write 0, timeout 0
+Requests/sec:   1156.41
+Transfer/sec:    322.17KB
+```
+
+### Conclusion for the high number of open connections, 10 threads
+Observations:
+- The number of socket connect errors start to appear when 300 open connections are defined.
+- The latency distribution at 99% percentile already starts as high as 389.30ms.
+- The number of threads is kept at 10 during the whole testing execution, simulating a scaling of open connections, still for the same quantity of users (threads).
+
+## Test results for the /pick endpoint with regular network load, scaling number of users and open connections
+The test scenarios used the following values, with the objective of gradually scaling the number of open connections, while keeping socket errors inexistent.
+
+#### 10 connections - 10 threads
+- Test duration: 15.10s
+- Total connections: 10
+- Total number of requests: 1326
+- Latency distribution: 128.78ms for the 90% percentile
+- Latency distribution: 310.96ms for the 99% percentile
+- Socket errors: 0
+
+``` bash
+  10 threads and 10 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   111.47ms   38.25ms 321.80ms   92.41%
+    Req/Sec     9.29      2.42    20.00     88.29%
+  Latency Distribution
+     50%  101.24ms
+     75%  105.11ms
+     90%  128.78ms
+     99%  310.96ms
+  1326 requests in 15.10s, 367.38KB read
+Requests/sec:     87.80
+Transfer/sec:     24.32KB
+```
+
+#### 20 connections - 20 threads
+- Test duration: 15.10s
+- Total connections: 20
+- Total number of requests: 2700
+- Latency distribution: 117.77ms for the 90% percentile
+- Latency distribution: 304.69ms for the 99% percentile
+- Socket errors: 0
+
+``` bash
+Running 15s test @ https://cah-api-test.herokuapp.com/pick
+  20 threads and 20 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   108.94ms   30.72ms 315.23ms   95.22%
+    Req/Sec     9.32      2.17    20.00     90.83%
+  Latency Distribution
+     50%  101.38ms
+     75%  107.35ms
+     90%  117.77ms
+     99%  304.69ms
+  2700 requests in 15.10s, 752.48KB read
+Requests/sec:    178.76
+Transfer/sec:     49.82KB
+```
+
+#### 40 connections - 40 threads
+- Test duration: 15.10s
+- Total connections: 40
+- Total number of requests: 5215
+- Latency distribution: 125.54ms for the 90% percentile
+- Latency distribution: 415.63ms for the 99% percentile
+- Socket errors: 0
+
+``` bash
+Running 15s test @ https://cah-api-test.herokuapp.com/pick
+  40 threads and 40 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   114.62ms   52.90ms 577.74ms   95.13%
+    Req/Sec     9.34      2.30    20.00     89.61%
+  Latency Distribution
+     50%  102.18ms
+     75%  108.39ms
+     90%  125.54ms
+     99%  415.63ms
+  5215 requests in 15.10s, 1.42MB read
+Requests/sec:    345.29
+Transfer/sec:     96.16KB
+```
+
+#### 80 connections - 80 threads
+- Test duration: 15.10s
+- Total connections: 80
+- Total number of requests: 7871
+- Latency distribution: 465.44ms for the 90% percentile
+- **Latency distribution: 1,35sms for the 99% percentile**
+- Socket errors: 0
+
+``` bash
+Running 15s test @ https://cah-api-test.herokuapp.com/pick
+  80 threads and 80 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   207.71ms  247.18ms   2.33s    89.45%
+    Req/Sec     8.44      2.83    20.00     78.28%
+  Latency Distribution
+     50%  114.41ms
+     75%  154.82ms
+     90%  465.44ms
+     99%    1.35s
+  7871 requests in 15.10s, 2.14MB read
+Requests/sec:    521.24
+Transfer/sec:    145.04KB
+```
+
+### Conclusion for the regular customer reaslistic load, scaling number of threads and open connections
+Observations:
+- No socket connect errors were generated, within a max of 80 threads and 80 open connections.
+- The latency distribution at 90% percentile is acceptable (125.54ms) until the 40 connections - 40 threads test scenario.
+- The test scenario for 80 connections and 80 threads can be considered as failed:
+- - Network latency at 90% percentile is almost four times higher, 465.44ms, then the previous test scenario.
+- - Network latency at 99% can be considered the start of critical response time, above the 1 second range.
+- The number of threads scales, together with the number of open connections during the whole testing execution. Simulating a scaled users skipe.
