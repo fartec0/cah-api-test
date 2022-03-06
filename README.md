@@ -15,6 +15,16 @@ The [Apache JMeter™](https://jmeter.apache.org/) application is open source so
 ## Pre-requisites
 The above mentioned tooling needs to be downloaded, as a project pre-requisite. Please refer to each tooling website for more information on how to install it. For Loader.io, a web account is required and the testing can be all performed online, without any software download.
 
+## System Under Test (SUT)
+The application under test is a fork from the Cards Against Humanity Node.JS, currently deployed to [Heroku](www.heroku.com) and available at: https://dashboard.heroku.com/apps/cah-api-test 
+
+There are three available API endpoints, that were used during this project:
+``` txt
+/question - get a random white card
+/answer - get a random black card
+/pick - get a question and answer randomly chosen
+```
+
 ## Objectives
 The testing objective is to initially establish a performance a and load baseline for the [Cards Against Humanity Node.JS application](https://github.com/fartec0/cah-node-api/), currently forked in this repository.
 
@@ -32,13 +42,16 @@ A industry-wide definition for an acceptable (web page) response time is based o
 But regarding an API application, the response time is in general within the milliseconds range, and not in seconds as the definiton applicable for web pages performance. In this case, it is important to first establish a project-wide performance baseline and keep monitoring it during the project lifetime. 
 For the modern web, any latency reduction is [very valuable](https://www.gigaspaces.com/blog/amazon-found-every-100ms-of-latency-cost-them-1-in-sales) and should be a focus within the software project.
 
-In order to establish a performance baseline, measurements can be performed, using a customer-realistic load. During the sofware development cycle, performance tests can be executed and the initial baseline used for comparison. Also it is important that no socket errors are encountered during the baseline definition.
+## Performance baseline
 
-For example, the following performance baseline was gathered using WRK tool, considering the below scenario a customer-realistics load:
+In order to establish a performance baseline, measurements should be performed using a `customer-realistic` load. During the sofware development cycle, performance tests can be executed and the initial baseline used for comparison. Also it is important that no socket errors are encountered during the baseline definition.
+
+### Customer realistic baseline
+For example, the following performance baseline (free of socket errors) was gathered using WRK tool, and its using the considered customer-realistic scenario for this project:
 - Endpoint: https://caha-api-test.herokuapp.com/pick
-- Test duration: 15.02s
+- **Test duration: 15.02s**
 - Number of open connections: 100
-- Number of threads (users): 10
+- **Number of threads (users): 10**
 - Total number of requests: 6539 (read)
 - Latency distribution: 119,45ms for the 99% percentile
 - Socket errors: 0
@@ -62,13 +75,6 @@ Requests/sec:    435.46
 Transfer/sec:    321.02KB
 ```
 
-
-#### Hardware metrics
-For this project, the selected tool was [PM2](https://pm2.io), as it can provide realtime hardware metrics for the Node.JS application.
-
-Example from PM2 dashboard, monitoring the `/fartec0/cah-node-api` Heroku application:
-![PM2-Dashboard](https://user-images.githubusercontent.com/1813225/156917326-f64504cc-f3cb-4e75-ade8-c1965b16cd00.png)
-
 ### Load spike Baseline 
 In this case we're looking for stabilishing load spike baseline metrics, and ultimately making sure that the applicatin is able to handle a very high amount of requests. 
 
@@ -76,6 +82,8 @@ Expected results:
 - The application should not stop responding, or show signs of Hardware resources exhaustion.
 - There should be no socket errors during the testing period.
 - The [Latency distribution](https://engineering.linkedin.com/performance/who-moved-my-99th-percentile-latency), majorly at 99% should be within a pre-determined acceptable response time and throughput.
+
+While stressing the application with a high number or connections, during the same time period and with the same quantity of threads, it is visible that the number of socket errors increase with the load - as seen below from the output of one of the test results. 
 
 #### WRK results showing socket errors
 - Test duration: 15.10s
@@ -99,3 +107,22 @@ Running 15s test @ https://caha-api-test.herokuapp.com/
 Requests/sec:   3535.17
 Transfer/sec:      1.18MB
 ```
+
+#### Hardware metrics
+For this project, the selected tool was [PM2](https://pm2.io), as it can provide realtime hardware metrics for the Node.JS application.
+
+Example from PM2 dashboard, monitoring the `/fartec0/cah-node-api` Heroku application:
+![PM2-Dashboard](https://user-images.githubusercontent.com/1813225/156917326-f64504cc-f3cb-4e75-ade8-c1965b16cd00.png)
+
+## Monitoring
+For monitoring the application response time and throughput, the [Heroku metrics dashboard](https://dashboard.heroku.com/apps/cah-api-test/metrics/web) was utilised. 
+
+Image below, an extract from the Heroku metrics dashboard, showing spikes in `response time` and `throughput`, including 5XX erros during peak load tests:
+![herokuDashboard](https://user-images.githubusercontent.com/1813225/156922757-01e9c983-eb5f-4e9d-9dad-d3676ea8c1c4.png)
+
+Note that the SUT could not handle an excessive amount of requests, demonstrating that the network load should be reduced gradually until no socket errors are triggered, and thus identifying the actual application limit.
+
+
+
+## Conclusion
+Considering the 
