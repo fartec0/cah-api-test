@@ -24,12 +24,11 @@ Besides measuring the network metrics, the hardware metrics can be also monitore
 
 ### Defining an acceptable response time
 A industry-wide definition for an acceptable (web page) response time is based on [Nielsen's](https://www.nngroup.com/articles/response-times-3-important-limits/) definition:
-``` txt
-Jakob Nielsen defined the 3 response-time limits which are determined by human perceptual abilities:
+> Jakob Nielsen defined the 3 response-time limits which are determined by human perceptual abilities:
 0.1 seconds. This limit gives users the feeling of instantaneous response. This level of responsiveness is essential to support the feeling of direct manipulation. It’s also an ideal response time for the website.
 1 second. One second keeps the user’s flow almost seamless. While users notice a slight delay, they still feel in control of the experience.
 10 seconds is the limit for the user’s attention. For delays of more than 10 seconds, users will want to perform other tasks while waiting for the computer to finish. A 10-second delay in the web without any feedback will often make visitors leave a site immediately.
-```
+
 But regarding an API application, the response time is in general within the milliseconds range, and not in seconds as the definiton applicable for web pages performance. In this case, it is important to first establish a project-wide performance baseline and keep monitoring it during the project lifetime. 
 For the modern web, any latency reduction is [very valuable](https://www.gigaspaces.com/blog/amazon-found-every-100ms-of-latency-cost-them-1-in-sales) and should be a focus within the software project.
 
