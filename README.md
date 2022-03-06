@@ -1,4 +1,4 @@
-# [DRAFT] Performance test report for the Cards Against Humanity Node.js API
+# Performance test report for the Cards Against Humanity Node.js API
 
 ## Tooling
 The selected tools for this analysis are Loader.io and WRK.
@@ -21,6 +21,9 @@ There are three available API endpoints, that were used during this project:
 /answer - get a random black card
 /pick - get a question and answer randomly chosen
 ```
+
+## Scope
+The scope of this analysis is the `/pick` endpoint only, serving as a basis for measuring other endpoints, as it would be the most complex endpoint in the API.
 
 ## Objectives
 The testing objective is to initially establish a performance a and load baseline for the [Cards Against Humanity Node.JS application](https://github.com/fartec0/cah-node-api/), currently forked in this repository.
@@ -358,13 +361,67 @@ Loader.io was used to simulate both very high number of requests (10,000) over a
 ### Test results for the scenario where 80 users connect over the period of 15 seconds
 
 #### Test Results
+Loader.io showing an average of 6ms response time:
 ![loaderTestResults](https://user-images.githubusercontent.com/1813225/156927112-32f81bc9-ea55-43df-b8ef-a4401c57feaa.png)
 
 
 #### Bandwidth
+Loader.io Bandwidth chart for the 80 user test scenario:
 ![loaderTestResultsBandwidth](https://user-images.githubusercontent.com/1813225/156927030-41057832-aedf-42a7-ac2a-64a7ba4c2094.png)
 
 #### Request details
+Loader.io Request details chart for the 80 user test scenario:
 ![loaderRequestDetails](https://user-images.githubusercontent.com/1813225/156927074-dc991ee9-4085-4361-92ee-8ab07afb773b.png)
 
+### Test results for the scenario where 10,000 users connect over the period of 15 seconds
+Loader.io showing an average of 27ms response time, without network errors:
+![loader10kResults](https://user-images.githubusercontent.com/1813225/156928044-21bf9a05-bfce-4593-8982-21fc6050d6c2.png)
+
+### Observations from the Loader.io performance tests
+- The SUT can support, without errors and within an adequate response time, a spike of traffic of 10,000 connected user over a period of 15 seconds.
+- The response time for a "slower" and more realistic scenario, e.g. 80 users connected over a period of 15 seconds, the SUT average response time was stable around 6ms, despite initial traffic spike.
+- Monitoring via Heroku dashboard shows different response times during the high burst of traffic - 10,000 users.
+
+#### Heroku Dashboard data during a high burst of traffic
+Response time and troughput:
+![herokuMetrics10000](https://user-images.githubusercontent.com/1813225/156928419-9a60d336-9c3c-42bf-bdc9-25877b781377.png)
+
+-------
+## Final conclusion
+Considering the wrt test results and the metrics presented at the Heroku dashboard, it was proven that the system thresholds (without errors) currently are:
+1. 10 threads and 200 connections, with a response time of 302ms for the 90% percentile
+2. Considering the scenario where the number of clients (threads) increase with the same as the number of open connections, the threshold limit for request without a 3s timeout was for 500 threads and 500 connections. While using a load of 600 threads, the timeouts start to occur. 
+
+Details from a 500 threads test:
+``` bash
+  500 threads and 500 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   253.45ms   78.43ms   1.16s    74.51%
+    Req/Sec     4.04      1.99    10.00     79.47%
+  Latency Distribution
+     50%  240.16ms
+     75%  286.22ms
+     90%  365.24ms
+     99%  516.94ms
+  28032 requests in 15.11s, 7.63MB read
+Requests/sec:   1855.64
+Transfer/sec:    517.18KB
+```
+
+Details from a 600 threads test, with timeouts occurring:
+``` bash
+  600 threads and 600 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   482.71ms  408.60ms   3.00s    88.92%
+    Req/Sec     2.86      2.29    10.00     84.41%
+  Latency Distribution
+     50%  337.76ms
+     75%  547.06ms
+     90%  936.48ms
+     99%    2.40s
+  17754 requests in 15.11s, 4.83MB read
+  Socket errors: connect 0, read 0, write 0, timeout 149
+Requests/sec:   1175.16
+Transfer/sec:    327.47KB
+```
 
