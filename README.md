@@ -1,10 +1,7 @@
 # [DRAFT] Performance test report for the Cards Against Humanity Node.js API
 
 ## Tooling
-The selected tools for this analysis are JMeter, Loader.io and WRK.
-
-### JMeter
-The [Apache JMeter™](https://jmeter.apache.org/) application is open source software, a 100% pure Java application designed to load test functional behavior and measure performance. It was originally designed for testing Web Applications but has since expanded to other test functions.
+The selected tools for this analysis are Loader.io and WRK.
 
 ### Loader.io
 [Loader.io](https://loader.io/) is a FREE load testing service that allows you to stress test your web-apps & apis with thousands of concurrent connections.
@@ -353,4 +350,21 @@ Observations:
 - The test scenario for 80 connections and 80 threads can be considered as failed:
 - - Network latency at 90% percentile is almost four times higher, 465.44ms, then the previous test scenario.
 - - Network latency at 99% can be considered the start of critical response time, above the 1 second range.
-- The number of threads scales, together with the number of open connections during the whole testing execution. Simulating a scaled users skipe.
+- The number of threads scales, together with the number of open connections during the whole testing execution. Simulating a scaled users spike.
+
+## Loader.io test results
+Loader.io was used to simulate both very high number of requests (10,000) over a period of 15 seconds, and more realistic scenarios like 80 users connection over the same period of 15 seconds.
+
+### Test results for the scenario where 80 users connect over the period of 15 seconds
+
+#### Test Results
+![loaderTestResults](https://user-images.githubusercontent.com/1813225/156927112-32f81bc9-ea55-43df-b8ef-a4401c57feaa.png)
+
+
+#### Bandwidth
+![loaderTestResultsBandwidth](https://user-images.githubusercontent.com/1813225/156927030-41057832-aedf-42a7-ac2a-64a7ba4c2094.png)
+
+#### Request details
+![loaderRequestDetails](https://user-images.githubusercontent.com/1813225/156927074-dc991ee9-4085-4361-92ee-8ab07afb773b.png)
+
+
