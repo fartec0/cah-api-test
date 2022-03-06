@@ -33,7 +33,35 @@ Jakob Nielsen defined the 3 response-time limits which are determined by human p
 But regarding an API application, the response time is in general within the milliseconds range, and not in seconds as the definiton applicable for web pages performance. In this case, it is important to first establish a project-wide performance baseline and keep monitoring it during the project lifetime. 
 For the modern web, any latency reduction is [very valuable](https://www.gigaspaces.com/blog/amazon-found-every-100ms-of-latency-cost-them-1-in-sales) and should be a focus within the software project.
 
-In order to establish a performance baseline, measurements can be performed, using both lower and more regular loads, and also high peak of loads. During the sofware development cycle, performance tests can be executed and the initial baseline used for comparison. 
+In order to establish a performance baseline, measurements can be performed, using a customer-realistic load. During the sofware development cycle, performance tests can be executed and the initial baseline used for comparison. Also it is important that no socket errors are encountered during the baseline definition.
+
+For example, the following performance baseline was gathered using WRK tool, considering the below scenario a customer-realistics load:
+- Endpoint: https://caha-api-test.herokuapp.com/pick
+- Test duration: 15.02s
+- Number of open connections: 100
+- Number of threads (users): 10
+- Total number of requests: 6539 (read)
+- Latency distribution: 119,45ms for the 99% percentile
+- Socket errors: 0
+
+``` bash
+wrk --latency --timeout 3s --threads 10 --connections 100 --duration 15s https://caha-api-test.herokuapp.com/pick
+Running 15s test @ https://caha-api-test.herokuapp.com/pick
+  10 threads and 100 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency    59.17ms   12.45ms 149.38ms   87.90%
+    Req/Sec    44.30     19.98   101.00     64.98%
+  Latency Distribution
+     50%   57.33ms
+     75%   63.01ms
+     90%   71.25ms
+     99%  119.45ms
+  6539 requests in 15.02s, 4.71MB read
+  Socket errors: connect 0, read 6539, write 0, timeout 0
+  Non-2xx or 3xx responses: 6539
+Requests/sec:    435.46
+Transfer/sec:    321.02KB
+```
 
 
 #### Hardware metrics
